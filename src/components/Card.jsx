@@ -6,19 +6,19 @@ const Card = ({value, suit, initVis}) => {
 
     let suitIcon, suitColor;
     switch (suit) {
-        case "Clubs":
+        case "clubs":
             suitIcon = '♣';
             suitColor = "black";
             break;
-        case "Diamonds":
+        case "diamonds":
             suitIcon = '♦';
             suitColor = "red";
             break;
-        case "Hearts":
+        case "hearts":
             suitIcon = '♥';
             suitColor = "red";
             break;
-        case "Spades":
+        case "spades":
             suitIcon = '♠';
             suitColor = "black";
             break;

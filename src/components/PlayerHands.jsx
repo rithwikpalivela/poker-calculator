@@ -11,7 +11,7 @@ const PlayerHands = ({handList}) => {
 
     return (
         <>
-            <div className="flexbox-container" style={{display: "flex", flexDirection: "row", justifyContent: "space-around"}}>
+            <div className="flexbox-container" style={{display: "flex", flexFlow: "row wrap", justifyContent: "space-around", gap: "10px"}}>
                 {hands}
             </div>
         </>
