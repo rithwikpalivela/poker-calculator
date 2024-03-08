@@ -71,7 +71,9 @@ function calcHand(cards) {
     const flush = new Set(suits).size === 1;
 
     // check for straight
-    let straight = orderedVals.join('') === orderedValSet.substring(0, orderedVals.length);
+    console.log(orderedVals);
+    let straight = orderedVals.join('') === "2345A";
+    console.log(straight);
 
     if (!straight && uniqueVals.size === orderedVals.length) {
         let counter = 1;
@@ -173,20 +175,25 @@ function compareHands(cards1, cards2) {
     // royal flush > straight flush > quads > full house > flush > straight > trips > 2 pair > pair > high
     // returns 1 if cards1 is better than cards2, -1 if worse, and 0 if the same
     const hand1 = calcHand(cards1);
+    console.log(hand1);
     const hand2 = calcHand(cards2);
+    console.log(hand2);
 
     if (hand1.rank !== hand2.rank) {
+        console.log("inside 1");
         return hand1.rank < hand2.rank ? 1 : -1;
     }
 
     if (orderedValSet.lastIndexOf(hand1.high[0]) === orderedValSet.lastIndexOf(hand2.high[0])) {
         if (hand1.high.length > 1 && orderedValSet.lastIndexOf(hand1.high[1]) !== orderedValSet.lastIndexOf(hand2.high[1])) {
+            console.log("inside 2");
             return orderedValSet.lastIndexOf(hand1.high[1]) > orderedValSet.lastIndexOf(hand2.high[1]) ? 1 : -1;
         }
 
         // look at kickers
         for (let i = hand1.kicker.length - 1; i >= 0; i--) {
             if (hand1.kicker[i] !== hand2.kicker[i]) {
+                console.log("inside 3");
                 return orderedValSet.lastIndexOf(hand1.kicker[i]) > orderedValSet.lastIndexOf(hand2.kicker[i]) ? 1 : -1;
             }
         }
@@ -218,7 +225,8 @@ function calcBestHand(hand, community) {
             }
         }
     }
-
+    console.log("best");
+    console.log(bestHand);
     return bestHand;
 }
 
@@ -279,12 +287,20 @@ const Board = ({numPlayers}) => {
                         let winnerHand;
                         for (const hand of hands) {
                             const currHand = calcBestHand(hand.slice(0, hand.length - 1), community);
-                            if (compareHands(currHand, bestHand) === 1) {
+                            console.log("curr");
+                            console.log(currHand);
+                            const comp = compareHands(currHand, bestHand);
+                            if (comp === 1) {
                                 winnerHand = hand;
                                 bestHand = currHand;
+                            } else if (comp === 0) {
+                                winnerHand = undefined;
                             }
+                            console.log("best");
+                            console.log(bestHand);
                         }
-
+                        console.log("winner");
+                        console.log(winnerHand);
                         if (winnerHand) {
                             setWinner(hands.indexOf(winnerHand) === 0 ? "Player" : "CPU " + hands.indexOf(winnerHand));
                         } else {
