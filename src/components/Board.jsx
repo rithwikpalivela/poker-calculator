@@ -2,6 +2,8 @@ import Deck from "./Deck";
 import Community from "./Community";
 import PlayerHands from "./PlayerHands";
 import { useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const cardValues = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 const orderedValSet = "A23456789TJQKA";
@@ -71,9 +73,7 @@ function calcHand(cards) {
     const flush = new Set(suits).size === 1;
 
     // check for straight
-    console.log(orderedVals);
     let straight = orderedVals.join('') === "2345A";
-    console.log(straight);
 
     if (!straight && uniqueVals.size === orderedVals.length) {
         let counter = 1;
@@ -133,7 +133,7 @@ function calcHand(cards) {
 
     // check for trips (rank 7) or 2 pair (rank 8)
     if (uniqueVals.size === orderedVals.length - 2) {
-        if (Object.keys(valCounts).reduce((i, j) => valCounts[i] > valCounts[j] ? i : j) === 3) {
+        if (maxValCount === 3) {
             // trips
             for (const val of orderedVals) {
                 if (valCounts[val] === 3) {
@@ -143,12 +143,12 @@ function calcHand(cards) {
         }
 
         // 2 pair
-        let lPair = Infinity;
-        let hPair = -Infinity;
+        let lPair = orderedValSet.length;
+        let hPair = -1;
         for (const val of orderedVals) {
             if (valCounts[val] === 2) {
-                lPair = Math.min(lPair, val);
-                hPair = Math.max(hPair, val);
+                lPair = Math.min(lPair, orderedValSet.lastIndexOf(val));
+                hPair = Math.max(hPair, orderedValSet.lastIndexOf(val));
             }
         }
         return {rank: 8, high: [hPair, lPair], kicker: orderedVals.filter((v) => v !== hPair && v !== lPair)};
@@ -175,25 +175,20 @@ function compareHands(cards1, cards2) {
     // royal flush > straight flush > quads > full house > flush > straight > trips > 2 pair > pair > high
     // returns 1 if cards1 is better than cards2, -1 if worse, and 0 if the same
     const hand1 = calcHand(cards1);
-    console.log(hand1);
     const hand2 = calcHand(cards2);
-    console.log(hand2);
 
     if (hand1.rank !== hand2.rank) {
-        console.log("inside 1");
         return hand1.rank < hand2.rank ? 1 : -1;
     }
 
     if (orderedValSet.lastIndexOf(hand1.high[0]) === orderedValSet.lastIndexOf(hand2.high[0])) {
         if (hand1.high.length > 1 && orderedValSet.lastIndexOf(hand1.high[1]) !== orderedValSet.lastIndexOf(hand2.high[1])) {
-            console.log("inside 2");
             return orderedValSet.lastIndexOf(hand1.high[1]) > orderedValSet.lastIndexOf(hand2.high[1]) ? 1 : -1;
         }
 
         // look at kickers
         for (let i = hand1.kicker.length - 1; i >= 0; i--) {
             if (hand1.kicker[i] !== hand2.kicker[i]) {
-                console.log("inside 3");
                 return orderedValSet.lastIndexOf(hand1.kicker[i]) > orderedValSet.lastIndexOf(hand2.kicker[i]) ? 1 : -1;
             }
         }
@@ -215,8 +210,8 @@ function calcBestHand(hand, community) {
     for (let i = 0; i < hand.length + community.length - 1; i++) {
         for (let j = i + 1; j < hand.length + community.length; j++) {
             const currHand = cardSet.filter((card, k) => k !== i && k !== j);
-
             const x = compareHands(currHand, bestHand);
+
             if (x === 1) {
                 bestHand = [];
                 for (const val of currHand) {
@@ -225,8 +220,7 @@ function calcBestHand(hand, community) {
             }
         }
     }
-    console.log("best");
-    console.log(bestHand);
+
     return bestHand;
 }
 
@@ -282,29 +276,29 @@ const Board = ({numPlayers}) => {
                         }}>
                         Deal Hands
                     </button>}
-                    {inGame && turn === 3 && <button onClick={() => {
+                    {inGame && turn === 3 && !!!winner && <button onClick={() => {
                         let bestHand = community;
                         let winnerHand;
                         for (const hand of hands) {
                             const currHand = calcBestHand(hand.slice(0, hand.length - 1), community);
-                            console.log("curr");
-                            console.log(currHand);
                             const comp = compareHands(currHand, bestHand);
+
                             if (comp === 1) {
                                 winnerHand = hand;
                                 bestHand = currHand;
                             } else if (comp === 0) {
                                 winnerHand = undefined;
                             }
-                            console.log("best");
-                            console.log(bestHand);
                         }
-                        console.log("winner");
-                        console.log(winnerHand);
+
                         if (winnerHand) {
-                            setWinner(hands.indexOf(winnerHand) === 0 ? "Player" : "CPU " + hands.indexOf(winnerHand));
+                            const winningPlayer = hands.indexOf(winnerHand) === 0 ? "Player" : "CPU " + hands.indexOf(winnerHand);
+                            setWinner(winningPlayer);
+                            toast("The winner is: " + winningPlayer + "!", { autoClose: false });
                         } else {
-                            setWinner("Tie");
+                            const winningPlayer = "Tie";
+                            setWinner(winningPlayer);
+                            toast("It was a tie!", { autoClose: false });
                         }
                         }}>
                         Calculate Winner
@@ -313,10 +307,8 @@ const Board = ({numPlayers}) => {
                 <div className="flex-item">
                     {hands && <PlayerHands handList={hands}/>}
                 </div>
-                <div>
-                    {winner && <p>The winner is: {winner}!</p>}
-                </div>
             </div>
+            <ToastContainer />
         </>
     );
 };
