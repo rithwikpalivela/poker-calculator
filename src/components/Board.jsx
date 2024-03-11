@@ -4,6 +4,8 @@ import PlayerHands from "./PlayerHands";
 import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+// import Confetti from "react-confetti";
+import ConfettiExplosion from "react-confetti-explosion";
 
 const cardValues = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 const orderedValSet = "A23456789TJQKA";
@@ -224,13 +226,14 @@ function calcBestHand(hand, community) {
     return bestHand;
 }
 
-const Board = ({numPlayers}) => {
+const Board = ({numPlayers, endGame}) => {
     const [topCard, setTopCard] = useState(deck[deck.length - 1]);
     const [hands, setHands] = useState();
     const [community, setCommunity] = useState([]);
     const [inGame, setInGame] = useState(false);
     const [turn, setTurn] = useState(0);
     const [winner, setWinner] = useState();
+    const [confetti, setConfetti] = useState(false);
 
     return (
         <>
@@ -294,11 +297,12 @@ const Board = ({numPlayers}) => {
                         if (winnerHand) {
                             const winningPlayer = hands.indexOf(winnerHand) === 0 ? "Player" : "CPU " + hands.indexOf(winnerHand);
                             setWinner(winningPlayer);
-                            toast("The winner is: " + winningPlayer + "!", { autoClose: false });
+                            setConfetti(true);
+                            toast("The winner is: " + winningPlayer + "!", { autoClose: false, onOpen: endGame });
                         } else {
                             const winningPlayer = "Tie";
                             setWinner(winningPlayer);
-                            toast("It was a tie!", { autoClose: false });
+                            toast("It was a tie!", { autoClose: false, onOpen: endGame });
                         }
                         }}>
                         Calculate Winner
@@ -308,7 +312,8 @@ const Board = ({numPlayers}) => {
                     {hands && <PlayerHands handList={hands}/>}
                 </div>
             </div>
-            <ToastContainer />
+            {confetti && <ConfettiExplosion force={0.6} duration={2500} particleCount={80} width={1000} style={{position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)"}} />}
+            {/* {!!winner && <Confetti initialVelocityY={-10} />} */}
         </>
     );
 };
