@@ -2,7 +2,7 @@ import Deck from "./Deck";
 import Community from "./Community";
 import PlayerHands from "./PlayerHands";
 import { useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 // import Confetti from "react-confetti";
 import ConfettiExplosion from "react-confetti-explosion";
